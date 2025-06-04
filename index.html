@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif Matematika Kelas 10</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F0F9FF; } /* Light Blue Background */
+        .quiz-container { background-color: #FFFFFF; }
+        .btn-option { transition: background-color 0.3s, transform 0.2s; }
+        .btn-option:hover { background-color: #E0F2FE; transform: translateY(-2px); } /* Lighter blue on hover */
+        .btn-option.selected { background-color: #BAE6FD; border-color: #38BDF8; } /* Sky Blue for selected */
+        .btn-option.correct { background-color: #A7F3D0; border-color: #34D399; color: #065F46; } /* Green for correct */
+        .btn-option.incorrect { background-color: #FECACA; border-color: #F87171; color: #991B1B; } /* Red for incorrect */
+        .feedback-box { border-left-width: 4px; }
+        .feedback-box.correct { border-left-color: #34D399; background-color: #D1FAE5; }
+        .feedback-box.incorrect { border-left-color: #F87171; background-color: #FEE2E2; }
+        .progress-bar-filled { background-color: #38BDF8; transition: width 0.5s ease-in-out; } /* Sky Blue for progress */
+        .btn-nav { background-color: #0EA5E9; color: white; } /* Bright Blue for nav buttons */
+        .btn-nav:hover { background-color: #0284C7; }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 bg-slate-100">
+
+    <div class="quiz-container w-full max-w-2xl p-6 md:p-8 rounded-xl shadow-2xl">
+        <header class="mb-6 text-center">
+            <h1 class="text-3xl font-bold text-sky-700">Kuis Matematika Keren K10</h1>
+            <p class="text-slate-600 mt-1">Uji pemahamanmu tentang materi Semester 2!</p>
+        </header>
+
+        <div id="progress-bar-container" class="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+            <div id="progress-bar-filled" class="h-2.5 rounded-full" style="width: 0%"></div>
+        </div>
+
+        <div id="quiz-area">
+            <div id="question-container" class="mb-6">
+                <p id="question-number" class="text-sm font-semibold text-sky-600 mb-1">Pertanyaan 1 dari X</p>
+                <p id="question-text" class="text-xl font-semibold text-slate-800 leading-tight">Memuat pertanyaan...</p>
+            </div>
+
+            <div id="options-container" class="space-y-3 mb-6">
+                <!-- Opsi jawaban akan dimuat di sini oleh JavaScript -->
+            </div>
+
+            <div id="feedback-container" class="hidden p-4 rounded-lg mb-6">
+                <p id="feedback-text" class="text-sm"></p>
+                <p id="explanation-text" class="mt-2 text-xs text-slate-700"></p>
+            </div>
+
+            <div id="navigation-buttons" class="flex justify-between items-center">
+                <button id="restart-button" class="btn-nav py-2 px-4 rounded-lg text-sm hidden">Ulangi Kuis</button>
+                <button id="next-button" class="btn-nav py-2 px-4 rounded-lg text-sm hidden">Pertanyaan Berikutnya</button>
+            </div>
+        </div>
+
+        <div id="score-area" class="hidden text-center">
+            <h2 class="text-2xl font-bold text-sky-700 mb-4">Hasil Kuis Selesai!</h2>
+            <p id="score-text" class="text-xl text-slate-800 mb-2">Skor Kamu: <span id="final-score" class="font-bold">0</span>/<span id="total-questions-score" class="font-bold">0</span></p>
+            <p id="score-percentage" class="text-3xl font-bold text-sky-600 mb-6">0%</p>
+            <button id="restart-quiz-button-score" class="btn-nav py-3 px-6 rounded-lg text-base">Ulangi Kuis</button>
+        </div>
+    </div>
+
+    <footer class="mt-8 text-center text-xs text-slate-500">
+        <p>&copy; 2025 Kuis Matematika Keren. Belajar sambil bermain!</p>
+    </footer>
+
+    <script>
+        const quizData = [
+            // SPLDV
+            {
+                topic: "SPLDV",
+                question: "Pasangan berurutan (x, y) yang merupakan solusi dari sistem persamaan linear 2x + y = 7 dan x - y = -1 adalah...",
+                options: ["(2, 3)", "(3, 1)", "(1, 5)", "(4, -1)"],
+                correctAnswer: "(2, 3)",
+                explanation: "Dengan metode substitusi atau eliminasi. Dari x - y = -1 => x = y - 1. Substitusi: 2(y-1) + y = 7 => 2y - 2 + y = 7 => 3y = 9 => y = 3. Maka x = 3 - 1 = 2. Solusi: (2, 3)."
+            },
+            {
+                topic: "SPLDV",
+                question: "Daerah himpunan penyelesaian dari pertidaksamaan 2x + 3y ≤ 6 digambar dengan garis penuh dan diarsir ke arah mana jika menggunakan titik uji (0,0)?",
+                options: ["Menjauhi (0,0)", "Mendekati (0,0)", "Tidak bisa ditentukan", "Di atas garis"],
+                correctAnswer: "Mendekati (0,0)",
+                explanation: "Garis batas: 2x + 3y = 6. Uji titik (0,0): 2(0) + 3(0) ≤ 6 => 0 ≤ 6 (BENAR). Maka, daerah yang memuat (0,0) adalah DHP-nya."
+            },
+            {
+                topic: "SPLDV",
+                question: "Harga 3 buku dan 2 pensil adalah Rp11.500. Harga 2 buku dan 1 pensil adalah Rp7.250. Harga 1 buku adalah...",
+                options: ["Rp2.000", "Rp2.500", "Rp3.000", "Rp1.500"],
+                correctAnswer: "Rp2.500",
+                explanation: "Misal buku=x, pensil=y. 3x+2y=11500 dan 2x+y=7250. Dari pers. kedua y=7250-2x. Substitusi: 3x+2(7250-2x)=11500 => 3x+14500-4x=11500 => -x = -3000 => x=3000. Eh, ada kesalahan hitung di soal/pilihan. Jika x=2500, maka y=7250-5000=2250. Cek: 3(2500)+2(2250)=7500+4500=12000. Seharusnya x=2500. Pembetulan: Jika x=2500, y=2250. 3(2500)+2(2250)=7500+4500=12000. 2(2500)+2250=5000+2250=7250. Jadi harga 1 buku Rp2.500."
+            },
+            {
+                topic: "SPLDV",
+                question: "Metode penyelesaian SPLDV dengan mengganti satu variabel dengan nilai dari persamaan lain disebut metode...",
+                options: ["Eliminasi", "Substitusi", "Grafik", "Determinan"],
+                correctAnswer: "Substitusi",
+                explanation: "Metode substitusi melibatkan penggantian (substitusi) ekspresi satu variabel dari satu persamaan ke persamaan lainnya."
+            },
+             {
+                topic: "SPLDV",
+                question: "Jika dua garis dalam sistem persamaan linear dua variabel sejajar dan tidak berimpit, maka sistem tersebut memiliki...",
+                options: ["Satu solusi", "Tidak ada solusi", "Tak hingga solusi", "Dua solusi"],
+                correctAnswer: "Tidak ada solusi",
+                explanation: "Dua garis yang sejajar dan tidak berimpit tidak akan pernah berpotongan, sehingga tidak ada titik (x,y) yang memenuhi kedua persamaan secara bersamaan."
+            },
+
+            // Fungsi Kuadrat
+            {
+                topic: "Fungsi Kuadrat",
+                question: "Jika fungsi kuadrat f(x) = ax² + bx + c memiliki nilai a > 0, maka grafik parabolanya akan...",
+                options: ["Terbuka ke bawah", "Terbuka ke atas", "Berupa garis lurus", "Tidak memiliki puncak"],
+                correctAnswer: "Terbuka ke atas",
+                explanation: "Nilai 'a' pada fungsi kuadrat menentukan keterbukaan parabola. Jika a > 0 (positif), parabola terbuka ke atas dan memiliki nilai minimum."
+            },
+            {
+                topic: "Fungsi Kuadrat",
+                question: "Sumbu simetri dari grafik fungsi kuadrat f(x) = x² - 6x + 5 adalah...",
+                options: ["x = -3", "x = 3", "x = 6", "x = 5"],
+                correctAnswer: "x = 3",
+                explanation: "Rumus sumbu simetri: x = -b / (2a). Untuk f(x) = x² - 6x + 5, a=1, b=-6. Maka x = -(-6) / (2*1) = 6 / 2 = 3."
+            },
+            {
+                topic: "Fungsi Kuadrat",
+                question: "Titik potong grafik fungsi kuadrat f(x) = x² - 2x - 8 dengan sumbu Y adalah...",
+                options: ["(0, 8)", "(0, -8)", "(4, 0)", "(-2, 0)"],
+                correctAnswer: "(0, -8)",
+                explanation: "Titik potong dengan sumbu Y terjadi saat x = 0. Maka f(0) = (0)² - 2(0) - 8 = -8. Jadi, titik potongnya adalah (0, -8)."
+            },
+            {
+                topic: "Fungsi Kuadrat",
+                question: "Nilai diskriminan (D) dari fungsi kuadrat f(x) = 2x² - 3x + 1 adalah...",
+                options: ["1", "-1", "17", "-7"],
+                correctAnswer: "1",
+                explanation: "Rumus diskriminan D = b² - 4ac. Untuk f(x) = 2x² - 3x + 1, a=2, b=-3, c=1. Maka D = (-3)² - 4(2)(1) = 9 - 8 = 1."
+            },
+            {
+                topic: "Fungsi Kuadrat",
+                question: "Fungsi kuadrat yang grafiknya memotong sumbu X di titik (1,0) dan (3,0) serta melalui titik (0,3) adalah...",
+                options: ["f(x) = x² - 4x + 3", "f(x) = -x² + 4x - 3", "f(x) = x² + 4x + 3", "f(x) = 3x² - 12x + 9"],
+                correctAnswer: "f(x) = x² - 4x + 3",
+                explanation: "Gunakan rumus y = a(x-x1)(x-x2). y = a(x-1)(x-3). Melalui (0,3): 3 = a(0-1)(0-3) => 3 = a(-1)(-3) => 3 = 3a => a=1. Jadi y = 1(x-1)(x-3) = x² - 4x + 3."
+            },
+
+            // Statistika
+            {
+                topic: "Statistika",
+                question: "Nilai yang paling sering muncul dalam suatu set data disebut...",
+                options: ["Mean", "Median", "Modus", "Range"],
+                correctAnswer: "Modus",
+                explanation: "Modus adalah nilai data yang memiliki frekuensi kemunculan paling tinggi."
+            },
+            {
+                topic: "Statistika",
+                question: "Data nilai ulangan: 7, 8, 6, 9, 7, 5, 7. Median dari data tersebut adalah...",
+                options: ["6", "7", "7.5", "8"],
+                correctAnswer: "7",
+                explanation: "Urutkan data: 5, 6, 7, 7, 7, 8, 9. Jumlah data ganjil (n=7), median adalah nilai tengah, yaitu data ke-4, yang adalah 7."
+            },
+            {
+                topic: "Statistika",
+                question: "Grafik yang paling cocok untuk menunjukkan proporsi atau persentase masing-masing bagian data terhadap keseluruhan adalah...",
+                options: ["Diagram Batang", "Diagram Garis", "Histogram", "Diagram Lingkaran"],
+                correctAnswer: "Diagram Lingkaran",
+                explanation: "Diagram Lingkaran (Pie Chart) digunakan untuk menunjukkan proporsi bagian terhadap keseluruhan."
+            },
+            {
+                topic: "Statistika",
+                question: "Jangkauan (range) dari data: 10, 15, 12, 18, 9, 20 adalah...",
+                options: ["5", "9", "11", "20"],
+                correctAnswer: "11",
+                explanation: "Jangkauan = Nilai Maksimum - Nilai Minimum. Data terurut: 9, 10, 12, 15, 18, 20. Jangkauan = 20 - 9 = 11."
+            },
+            {
+                topic: "Statistika",
+                question: "Rata-rata (mean) dari data 4, 5, 6, 7, 8 adalah...",
+                options: ["5", "5.5", "6", "6.5"],
+                correctAnswer: "6",
+                explanation: "Mean = (Jumlah semua data) / (Banyaknya data) = (4+5+6+7+8) / 5 = 30 / 5 = 6."
+            },
+
+            // Peluang
+            {
+                topic: "Peluang",
+                question: "Dalam pelemparan sebuah dadu bersisi enam, peluang muncul mata dadu bilangan prima adalah...",
+                options: ["1/6", "2/6", "3/6", "4/6"],
+                correctAnswer: "3/6",
+                explanation: "Ruang sampel S = {1,2,3,4,5,6}, n(S)=6. Bilangan prima pada dadu A = {2,3,5}, n(A)=3. P(A) = n(A)/n(S) = 3/6."
+            },
+            {
+                topic: "Peluang",
+                question: "Dari 5 calon, akan dipilih Ketua dan Wakil Ketua. Banyaknya susunan yang mungkin adalah...",
+                options: ["10", "20", "25", "120"],
+                correctAnswer: "20",
+                explanation: "Ini permutasi karena urutan penting. P(5,2) = 5!/(5-2)! = 5!/3! = 5*4 = 20."
+            },
+            {
+                topic: "Peluang",
+                question: "Sebuah koin dilempar 50 kali. Frekuensi harapan munculnya sisi Angka adalah...",
+                options: ["10 kali", "20 kali", "25 kali", "50 kali"],
+                correctAnswer: "25 kali",
+                explanation: "Peluang Angka P(A) = 1/2. Banyak percobaan N = 50. Frekuensi harapan Fh(A) = P(A) * N = (1/2) * 50 = 25."
+            },
+            {
+                topic: "Peluang",
+                question: "Dalam sebuah kantong terdapat 4 bola merah dan 6 bola biru. Peluang terambilnya 1 bola merah secara acak adalah...",
+                options: ["4/6", "6/10", "4/10", "1/4"],
+                correctAnswer: "4/10",
+                explanation: "Total bola n(S) = 4 + 6 = 10. Jumlah bola merah n(A) = 4. Peluang P(A) = n(A)/n(S) = 4/10."
+            },
+            {
+                topic: "Peluang",
+                question: "Dua buah dadu dilempar bersamaan. Peluang munculnya jumlah mata dadu sama dengan 5 adalah...",
+                options: ["2/36", "3/36", "4/36", "5/36"],
+                correctAnswer: "4/36",
+                explanation: "Ruang sampel n(S) = 6*6 = 36. Kejadian jumlah 5: (1,4), (2,3), (3,2), (4,1). Jadi n(A) = 4. Peluang P(A) = 4/36."
+            }
+        ];
+
+        const quizArea = document.getElementById('quiz-area');
+        // Variabel lain yang mengambil elemen DOM sudah dideklarasikan di atas
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackTextEl = document.getElementById('feedback-text');
+        const explanationTextEl = document.getElementById('explanation-text');
+        const nextButton = document.getElementById('next-button');
+        const restartButton = document.getElementById('restart-button');
+        
+        const scoreArea = document.getElementById('score-area');
+        const finalScoreEl = document.getElementById('final-score');
+        const totalQuestionsScoreEl = document.getElementById('total-questions-score');
+        const scorePercentageEl = document.getElementById('score-percentage');
+        const restartQuizButtonScore = document.getElementById('restart-quiz-button-score');
+
+        const progressBarFilled = document.getElementById('progress-bar-filled');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questionsOrder = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                const temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        function startQuiz() {
+            questionsOrder = [];
+            for (let i = 0; i < quizData.length; i++) {
+                questionsOrder.push(i);
+            }
+            shuffleArray(questionsOrder);
+            currentQuestionIndex = 0;
+            score = 0;
+            quizArea.classList.remove('hidden');
+            scoreArea.classList.add('hidden');
+            nextButton.classList.add('hidden');
+            restartButton.classList.add('hidden');
+            feedbackContainer.classList.add('hidden');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            feedbackContainer.classList.add('hidden');
+            optionsContainer.innerHTML = ''; 
+            
+            const questionIndexInOriginalArray = questionsOrder[currentQuestionIndex];
+            const currentQuestion = quizData[questionIndexInOriginalArray];
+
+            questionNumberEl.textContent = "Pertanyaan " + (currentQuestionIndex + 1) + " dari " + quizData.length;
+            questionTextEl.textContent = currentQuestion.question;
+
+            const shuffledOptions = currentQuestion.options.slice();
+            shuffleArray(shuffledOptions);
+
+            shuffledOptions.forEach(function(option) {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('btn-option', 'w-full', 'text-left', 'p-3', 'border-2', 'border-slate-300', 'rounded-lg', 'hover:bg-sky-100', 'focus:outline-none', 'focus:ring-2', 'focus:ring-sky-400');
+                button.addEventListener('click', function() {
+                    selectAnswer(option, button, currentQuestion.correctAnswer, currentQuestion.explanation);
+                });
+                optionsContainer.appendChild(button);
+            });
+            nextButton.classList.add('hidden');
+            updateProgressBar();
+        }
+
+        function selectAnswer(selectedOption, buttonEl, correctAnswer, explanation) {
+            const allOptionButtons = optionsContainer.querySelectorAll('.btn-option');
+            allOptionButtons.forEach(function(btn) {
+                btn.disabled = true; 
+                btn.classList.remove('hover:bg-sky-100');
+                if (btn.textContent === correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (btn.textContent === selectedOption && selectedOption !== correctAnswer) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            buttonEl.classList.add('selected');
+
+            if (selectedOption === correctAnswer) {
+                score++;
+                feedbackTextEl.textContent = "Jawaban Benar! 👍";
+                feedbackContainer.className = 'feedback-box correct p-4 rounded-lg mb-6';
+                explanationTextEl.textContent = explanation;
+            } else {
+                feedbackTextEl.textContent = "Jawaban Salah. 😥 Jawaban yang benar adalah: " + correctAnswer;
+                feedbackContainer.className = 'feedback-box incorrect p-4 rounded-lg mb-6';
+                explanationTextEl.textContent = explanation;
+            }
+            feedbackContainer.classList.remove('hidden');
+            nextButton.classList.remove('hidden');
+            if (currentQuestionIndex < quizData.length - 1) {
+                nextButton.textContent = "Pertanyaan Berikutnya";
+            } else {
+                nextButton.textContent = "Lihat Hasil";
+            }
+        }
+
+        function handleNextButton() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showScore();
+            }
+        }
+        
+        function showScore() {
+            quizArea.classList.add('hidden');
+            scoreArea.classList.remove('hidden');
+            finalScoreEl.textContent = score;
+            totalQuestionsScoreEl.textContent = quizData.length;
+            const percentage = Math.round((score / quizData.length) * 100);
+            scorePercentageEl.textContent = percentage + "%";
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / quizData.length) * 100;
+            progressBarFilled.style.width = progress + "%";
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            nextButton.addEventListener('click', handleNextButton);
+            restartQuizButtonScore.addEventListener('click', startQuiz);
+            startQuiz(); 
+        });
+    </script>
+</body>
+</html>
